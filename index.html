@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>스타벅스 쿠폰 이벤트</title>
+  <style>
+    /* 기본 리셋 및 모바일 프레임 설정 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #261a22;
+      overflow-x: hidden;
+    }
+
+    /* 스마트폰 모바일 컨테이너 */
+    .mobile-container {
+      position: relative;
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background-color: #fce8ee;
+      overflow: hidden;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.4);
+      padding-bottom: 40px;
+    }
+
+    /* [효과 1] 파티클 캔버스 (벚꽃/하트 흩날림) */
+    #particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* [효과 2] 메인 후광 효과 (Glow Effect) */
+    .hero-glow {
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255, 182, 193, 0.8) 0%, rgba(252, 232, 238, 0) 70%);
+      z-index: 0;
+      animation: pulseGlow 3s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    /* 레이어 공통 Absolute 스타일 */
+    .layer-item {
+      position: absolute;
+    }
+    .layer-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      position: relative;
+      width: 100%;
+      height: 680px;
+      margin-top: 10px;
+    }
+
+    .item-stage-podium {
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 380px;
+      z-index: 1;
+    }
+
+    .item-leaf-left {
+      left: -10px;
+      bottom: 180px;
+      width: 220px;
+      z-index: 2;
+      transform-origin: bottom center;
+      animation: swayLeaf 4s infinite ease-in-out;
+    }
+    .item-leaf-right {
+      right: -30px;
+      bottom: 180px;
+      width: 220px;
+      z-index: 2;
+      transform-origin: bottom center;
+      animation: swayLeaf 4.5s infinite ease-in-out 0.5s;
+    }
+
+    .item-insta-frame {
+      left: 50%;
+      top: 90px;
+      transform: translateX(-50%);
+      width: 340px;
+      height: 480px;
+      z-index: 3;
+    }
+
+    .item-main-character {
+      left: 50%;
+      top: 100px;
+      transform: translateX(-50%);
+      width: 310px;
+      z-index: 4;
+      cursor: pointer;
+      animation: floatCharacter 4s infinite ease-in-out;
+      transition: transform 0.1s ease;
+    }
+    .item-main-character:active {
+      transform: translate(-50%, -6px) scale(0.96);
+    }
+
+    .item-sticker-recommend {
+      left: 100px;
+      top: -15px;
+      width: 150px;
+      z-index: 8;
+      animation: popSticker 3s infinite ease-in-out;
+    }
+    .item-title-text {
+      right: -10px;
+      top: 50px;
+      width: 300px;
+      z-index: 8;
+      animation: floatTitle 3.5s infinite ease-in-out;
+    }
+
+    .item-smile-flower {
+      left: 40px;
+      top: 100px;
+      width: 105px;
+      z-index: 7;
+      animation: bounceRotate 3.5s infinite ease-in-out;
+    }
+
+    .item-gift-left {
+      left: 15px;
+      top: 220px;
+      width: 85px;
+      z-index: 6;
+      animation: floatGift 3.2s infinite ease-in-out;
+    }
+    .item-gift-right {
+      right: 15px;
+      top: 280px;
+      width: 85px;
+      z-index: 6;
+      animation: floatGift 3.6s infinite ease-in-out 0.4s;
+    }
+
+    .item-heart-speech {
+      right: 100px;
+      top: 200px;
+      width: 60px;
+      z-index: 6;
+      animation: pulseHeart 2.5s infinite ease-in-out;
+    }
+    .item-heart-balloon-top {
+      right: 25px;
+      top: 20px;
+      width: 65px;
+      z-index: 5;
+      animation: floatBalloon 4s infinite ease-in-out;
+    }
+    .item-heart-balloon-left {
+      left: 25px;
+      bottom: 220px;
+      width: 55px;
+      z-index: 6;
+      animation: pulseHeart 2.8s infinite ease-in-out 0.3s;
+    }
+
+    .item-profile-icon {
+      left: 65px;
+      bottom: 125px;
+      top: 440px;
+      width: 70px;
+      z-index: 6;
+    }
+    .item-winged-heart {
+      right: 15px;
+      bottom: 105px;
+      width: 150px;
+      z-index: 7;
+      animation: floatWinged 3s infinite ease-in-out;
+    }
+
+    /* [효과 3] 반짝이는 별 스파클 효과 */
+    .sparkle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+      z-index: 9;
+      pointer-events: none;
+      animation: sparkleAnim 2s infinite ease-in-out;
+    }
+    .sp-1 { top: 80px; left: 60px; animation-delay: 0s; }
+    .sp-2 { top: 180px; right: 40px; animation-delay: 0.7s; }
+    .sp-3 { top: 380px; left: 30px; animation-delay: 1.3s; }
+
+    /* [효과 4] 클릭/터치 시 피어오르는 이미지 팝업 (정상 위치로 이동) */
+    .pop-heart {
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      pointer-events: none;
+      z-index: 10;
+      animation: popHeartUp 1.2s forwards ease-out;
+    }
+    .pop-heart img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Keyframes */
+    @keyframes floatCharacter {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -10px); }
+    }
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes swayLeaf {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(4deg); }
+    }
+    @keyframes floatGift {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(-4deg); }
+    }
+    @keyframes pulseHeart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    @keyframes floatWinged {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes bounceRotate {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(8deg); }
+    }
+    @keyframes popSticker {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    @keyframes floatBalloon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.9; transform: translateX(-50%) scale(1.15); }
+    }
+    @keyframes sparkleAnim {
+      0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(45deg); }
+    }
+    @keyframes popHeartUp {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.5) rotate(0deg); }
+      50% { transform: translate(-50%, -40px) scale(1.2) rotate(15deg); }
+      100% { opacity: 0; transform: translate(-50%, -80px) scale(0.8) rotate(-15deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-container" id="container">
+
+    <!-- 🌸 파티클 캔버스 (흩날리는 벚꽃잎 & 하트) -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- ✨ 후광 효과 -->
+    <div class="hero-glow"></div>
+
+    <!-- 💫 반짝이는 별빛 스파클 -->
+    <div class="sparkle sp-1"></div>
+    <div class="sparkle sp-2"></div>
+    <div class="sparkle sp-3"></div>
+
+    <section class="hero-section">
+
+      <!-- 배경 및 요소들 -->
+      <div class="layer-item item-stage-podium">
+        <img src="imagesstage_podium.png" alt="하단 단상 Stage">
+      </div>
+      <div class="layer-item item-leaf-left">
+        <img src="imagesleaf_left.png" alt="왼쪽 나뭇잎">
+      </div>
+      <div class="layer-item item-leaf-right">
+        <img src="imagesleaf_right.png" alt="오른쪽 나뭇잎">
+      </div>
+      <div class="layer-item item-insta-frame">
+        <img src="imagesinsta_frame.png" alt="인스타그램 프레임">
+      </div>
+
+      <!-- 클릭 터치 대상: 메인 캐릭터 -->
+      <div class="layer-item item-main-character" id="mainChar">
+        <img src="imageschar_woman_phone.png" alt="스마트폰 보는 여자 캐릭터">
+      </div>
+
+      <div class="layer-item item-sticker-recommend">
+        <img src="imagessticker_two_people.png" alt="두명추천시 스티커">
+      </div>
+      <div class="layer-item item-title-text">
+        <img src="imagestitle_starbucks.png" alt="스타벅스 쿠폰 드립니다!">
+      </div>
+      <div class="layer-item item-smile-flower">
+        <img src="imagessmile_flower.png" alt="스마일 꽃 스티커">
+      </div>
+      <div class="layer-item item-gift-left">
+        <img src="imagesgift_box_left.png" alt="왼쪽 선물상자">
+      </div>
+      <div class="layer-item item-gift-right">
+        <img src="imagesgift_box_right.png" alt="오른쪽 선물상자">
+      </div>
+      <div class="layer-item item-heart-speech">
+        <img src="imagesheart_speech.png" alt="하트 말풍선">
+      </div>
+      <div class="layer-item item-heart-balloon-top">
+        <img src="imagesheart_top.png" alt="우측 상단 하트 풍선">
+      </div>
+      <div class="layer-item item-heart-balloon-left">
+        <img src="imagesheart_left.png" alt="좌측 하단 하트">
+      </div>
+      <div class="layer-item item-profile-icon">
+        <img src="imagesprofile_icon.png" alt="프로필 아이콘">
+      </div>
+      <div class="layer-item item-winged-heart">
+        <img src="imageswinged_heart.png" alt="날개 달린 하트 아이콘">
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- 스크립트 모음 -->
+  <script>
+    // 1. 벚꽃잎 & 하트 흩날리기 효과 (Canvas)
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('container');
+
+    function resizeCanvas() {
+      canvas.width = container.offsetWidth;
+      canvas.height = container.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const particles = [];
+    const particleCount = 20;
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        this.size = Math.random() * 8 + 6;
+        this.speedY = Math.random() * 1.5 + 0.8;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.rotation = Math.random() * 360;
+        this.rotSpeed = Math.random() * 2 - 1;
+        this.opacity = Math.random() * 0.6 + 0.4;
+        this.isHeart = Math.random() > 0.6;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += Math.sin(this.y * 0.02) + this.speedX;
+        this.rotation += this.rotSpeed;
+        if (this.y > canvas.height + 20) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.globalAlpha = this.opacity;
+
+        if (this.isHeart) {
+          ctx.fillStyle = '#ff6b8b';
+          ctx.font = `${this.size + 4}px sans-serif`;
+          ctx.fillText('♥', 0, 0);
+        } else {
+          ctx.fillStyle = '#ffb7c5';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, this.size, this.size / 2, Math.PI / 4, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 2. 캐릭터 터치 시 이미지가 피어오르는 효과 (JS)
+    const mainChar = document.getElementById('mainChar');
+
+    // 팝업으로 띄우고 싶은 이미지 경로 목록 (필요에 따라 수정 가능)
+    const popImages = [
+      'imagesheart_speech.png',
+      'imageswinged_heart.png',
+      'imagessmile_flower.png'
+    ];
+
+    mainChar.addEventListener('click', (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      for (let i = 0; i < 2; i++) {
+        const popItem = document.createElement('div');
+        popItem.className = 'pop-heart';
+        
+        const randomImg = popImages[Math.floor(Math.random() * popImages.length)];
+        popItem.innerHTML = `<img src="${randomImg}" alt="pop">`;
+
+        const offsetX = (Math.random() * 60 - 30);
+        const offsetY = (Math.random() * 30 - 15);
+        
+        popItem.style.left = (x + offsetX) + 'px';
+        popItem.style.top = (y + offsetY) + 'px';
+
+        container.appendChild(popItem);
+
+        setTimeout(() => popItem.remove(), 1200);
+      }
+    });
+  </script>
+</body>
+</html>
